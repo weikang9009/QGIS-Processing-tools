@@ -40,7 +40,11 @@ if classification in classifiers:
     #c=ps.Quantiles(y,k)
     c=classifiers[classification](y,k)
 
-upper = c.bins.tolist()
+try:
+    upper = c.bins.tolist() #for pysal 1.9dev +
+except:
+    upper = c.bins
+
 min_y = y.min()
 
 print upper,min_y
