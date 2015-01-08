@@ -3,6 +3,8 @@
 ##field=field input
 ##classification=selection Quantile; Maximum Breaks; Fisher-Jenks
 ##classes=selection 3;4;5;6;7;8;9
+##colorMap=selection Blues; BuGn; BuPu; Greys; OrRd; YlGnBu; YlOrRd
+
 
 import pysal 
 import numpy as np
@@ -13,9 +15,10 @@ from PyQt4.QtCore import *
 from PyQt4 import QtGui
 from qgis.utils import iface
 import sys
-
 import json
+from brewer2mpl import sequential
 
+colorMaps = ['Blues', 'BuGn', 'BuPu', 'Greys', 'OrRd', 'YlGnBu', 'YlOrRd']
    
 # np.random.seed(10)
 
@@ -49,28 +52,20 @@ min_y = y.min()
 
 print upper,min_y
 
-colors = ["#eff3ff", "#bdd7e7", "#6baed6", "#2171b5"]
-schemes = {}
-schemes[3] = ['#e5f5f9', '#99d8c9', '#2ca25f']
-schemes[4] = ['#edf8fb', '#b2e2e2', '#66c2a4', '#238b45']
-schemes[5] = ['#edf8fb', '#b2e2e2', '#66c2a4', '#2ca25f', '#006d2c']
-schemes[6] = ['#edf8fb', '#ccece6', '#99d8c9', '#66c2a4', '#2ca25f', '#006d2c']
-schemes[7] = ['#edf8fb', '#ccece6', '#99d8c9', '#66c2a4', '#41ae76', '#238b45', '#005824']
-schemes[8] = ['#f7fcfd', '#e5f5f9', '#ccece6', '#99d8c9', '#66c2a4', '#41ae76', '#238b45', '#005824']
-schemes[9] = ['#f7fcfd', '#e5f5f9', '#ccece6', '#99d8c9', '#66c2a4', '#41ae76', '#238b45', '#006d2c', '#00441b']
 
-colors = schemes[k]
+colors = eval('sequential.'+colorMaps[colorMap])[k].hex_colors
 
 lower = [min_y]
 lower.extend(upper[:-1])
 range_list = []
 symbols = []
+
 for i in range(k):
     print lower[i], upper[i]
     symbols.append(QgsSymbolV2.defaultSymbol(layer.geometryType()))
     symbols[i].setColor(QtGui.QColor(colors[i]))
     symbols[i].setAlpha(1) # change to option
-    label = "%.1f-%.1f"%(lower[i],upper[i])
+    label = "%#.3g-%#.3g"%(lower[i],upper[i])
     range_list.append(QgsRendererRangeV2(lower[i],upper[i],symbols[i], label))
 
 renderer = QgsGraduatedSymbolRendererV2('', range_list)
