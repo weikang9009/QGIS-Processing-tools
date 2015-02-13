@@ -1,28 +1,30 @@
 ##Spatial statistics=group
 ##input=vector
-##field=field input
+##variable_field=field input
+##population_field=field input
 ##contiguity=string queen
-##significance=number 0.05
 
 import pysal 
 import numpy as np
 import processing 
-from processing.core.VectorWriter import VectorWriter
+from processing.tools.vector import VectorWriter
 from qgis.core import *
 from PyQt4.QtCore import *
 
-field = field[0:10] # try to handle Shapefile field length limit
+variable_field = variable_field[0:10] # try to handle Shapefile field length limit
+population_field = population_field[0:10]
 
 if contiguity == 'queen':
-    print 'INFO: Global Moran\'s using queen contiguity'
+    print 'INFO: Global Moran\'s for rates using queen contiguity'
     w=pysal.queen_from_shapefile(input)
 else:
-    print 'INFO: Global Moran\'s using rook contiguity'
+    print 'INFO: Global Moran\'s for rates using rook contiguity'
     w=pysal.rook_from_shapefile(input)
     
 f = pysal.open(pysal.examples.get_path(input.replace('.shp','.dbf')))
-y=np.array(f.by_col[str(field)])
-m = pysal.Moran(y,w,transformation = "r", permutations = 999)
+y=np.array(f.by_col[str(variable_field)])
+population=np.array(f.by_col[str(population_field)])
+m = pysal.esda.moran.Moran_Rate(y,population,w,transformation = "r", permutations = 999)
 
 print "Moran's I: %f" % (m.I)
 print "INFO: Moran's I values range from -1 (indicating perfect dispersion) to +1 (perfect correlation). Values close to -1/(n-1) indicate a random spatial pattern."

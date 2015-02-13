@@ -2,12 +2,12 @@
 ##input=vector
 ##field=field input
 ##contiguity=string queen
-##significance=number 0.05
+##i=output number 
 
 import pysal 
 import numpy as np
 import processing 
-from processing.core.VectorWriter import VectorWriter
+from processing.tools.vector import VectorWriter
 from qgis.core import *
 from PyQt4.QtCore import *
 
@@ -23,6 +23,8 @@ else:
 f = pysal.open(pysal.examples.get_path(input.replace('.shp','.dbf')))
 y=np.array(f.by_col[str(field)])
 m = pysal.Moran(y,w,transformation = "r", permutations = 999)
+
+i=m.I
 
 print "Moran's I: %f" % (m.I)
 print "INFO: Moran's I values range from -1 (indicating perfect dispersion) to +1 (perfect correlation). Values close to -1/(n-1) indicate a random spatial pattern."
