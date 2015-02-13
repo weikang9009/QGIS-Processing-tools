@@ -77,8 +77,3 @@ QgsMapLayerRegistry.instance().addMapLayer(layer)
 iface.mapCanvas().refresh()
 iface.legendInterface().refreshLayerSymbology(layer)
 iface.mapCanvas().refresh()
-
-
-
-
-
