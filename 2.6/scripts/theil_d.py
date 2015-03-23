@@ -19,7 +19,5 @@ print "Regime:  ", regime
 print "Global inequality T: ", theil_d.T
 print "Within regions: ", theil_d.wg[0][0]
 print "Between regions: ", theil_d.bg[0][0]
-if int(pysal.version.split(".")[1]) > 9: # 10.0-dev handles 0 share cases for the mean correctly
-    print "Exepected between regions: ", theil_d.bg[1:].mean()
 print "p-value: ",theil_d.bg_pvalue[0]
 
