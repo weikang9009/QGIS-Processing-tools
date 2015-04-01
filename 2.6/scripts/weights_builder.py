@@ -69,8 +69,6 @@ def layerToW(layer, wType='ROOK'):
         v2p = e2p
     
     n = i
-    print n
-    neighbors = dict([ (i,[]) for i in xrange(n)])
     neighbors = defaultdict(set)
     for v in v2p:
         vn = v2p[v]
@@ -84,18 +82,15 @@ def layerToW(layer, wType='ROOK'):
     for i in neighbors:
         neighbors[i] = list(set(neighbors[i]))
 
-
     return pysal.W(neighbors)
 
 contiguity = ["ROOK", "QUEEN"][contiguity]
 
 if contiguity == 'QUEEN':
     print 'INFO:Queen contiguity'
-    #w=pysal.queen_from_shapefile(input)
     w = layerToW(layer,'QUEEN')
 else:
     print 'INFO: Rook contiguity'
-    #w=pysal.rook_from_shapefile(input)
     w = layerToW(layer, 'ROOK')
 
 n_neigh = w.cardinalities.values()
