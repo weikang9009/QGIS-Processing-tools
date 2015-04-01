@@ -10,6 +10,7 @@ from processing.tools.vector import VectorWriter
 from qgis.core import *
 from PyQt4.QtCore import *
 from itertools import combinations
+from collections import defaultdict
 
 # np.random.seed(10)
 
@@ -24,79 +25,61 @@ writer = VectorWriter(n_neighbors, None,fields, provider.geometryType(), layer.c
 print layer
 
 def layerToW(layer, wType='ROOK'):
-    # currently queen only to get this working with qgis
+    
     polys = []
     ids = []
-    i = 0
-    v2p = {}
+    v2p = defaultdict(set)
     iterator = layer.getFeatures()
     if wType == 'QUEEN':
+        i = 0
         for feat in iterator:
             geom = feat.geometry()
             if geom.wkbType() == 6: #multipolygon
                 polys = geom.asMultiPolygon()
-                for poly in polys:
-                    for part in poly:
-                        for v in part:
-                            if v not in v2p:
-                                v2p[v] = []
-                            v2p[v].append(i)
-            else: # polygon
-                poly = geom.asPolygon()
-                for part in poly:
-                    for v in part:
-                        if v not in v2p:
-                            v2p[v] = []
-                        v2p[v].append(i)
+            else:
+                polys = [geom.asPolygon()] # polygon
+                
+            for poly in polys:
+                for ring in poly:
+                    for v in ring:
+                        v2p[v].add(i)
+           
             i+=1
     else: #Rook
-        e2p = {}
+        e2p = defaultdict(set)
+        
+        i = 0
         for feat in iterator:
             geom = feat.geometry()
             if geom.wkbType() == 6: #multipolygon
                 polys = geom.asMultiPolygon()
-                for poly in polys:
-                    for part in poly:
-                        lnv = len(part)
-                        for oi in range(lnv-1):
-                            o = part[oi]
-                            d = part[oi+1]
-                            od = (o,d)
-                            do = (d,o)
-                            if od not in e2p:
-                                e2p[od] = []
-                            if do not in e2p:
-                                e2p[do] = []
-                            e2p[od].append(i)
-                            e2p[do].append(i)
-            else: # polygon
-                poly = geom.asPolygon()
-                for part in poly:
-                    for v in part:
-                        lnv = len(part)
-                        for oi in range(lnv-1):
-                            o = part[oi]
-                            d = part[oi+1]
-                            od = (o,d)
-                            do = (d,o)
-                            if od not in e2p:
-                                e2p[od] = []
-                            if do not in e2p:
-                                e2p[do] = []
-                            e2p[od].append(i)
-                            e2p[do].append(i)
+            else:
+                polys = [geom.asPolygon()] #polygon
+                
+            for poly in polys:
+                for ring in poly:
+                    nv = len(ring)
+                    for oi in range(nv-1):
+                        o = ring[oi]
+                        d = ring[oi+1]
+                        e2p[o,d].add(i)
+                        e2p[d,o].add(i)
+                            
             i+=1
         v2p = e2p
+    
     n = i
+    print n
     neighbors = dict([ (i,[]) for i in xrange(n)])
+    neighbors = defaultdict(set)
     for v in v2p:
-        vn = list(set(v2p[v]))
+        vn = v2p[v]
         lvn = len(vn)
         if  lvn > 1:
             pairs = combinations(vn,2)
             for i,j in pairs:
-                neighbors[i].append(j)
-                neighbors[j].append(i)
+                neighbors[i].add(j)
+                neighbors[j].add(i)
 
     for i in neighbors:
         neighbors[i] = list(set(neighbors[i]))
@@ -116,7 +99,7 @@ else:
     w = layerToW(layer, 'ROOK')
 
 n_neigh = w.cardinalities.values()
-print n_neigh
+print 'cardinalities: ',n_neigh
 outFeat = QgsFeature()
 
 i = 0
