@@ -12,10 +12,6 @@ from PyQt4.QtCore import *
 from itertools import combinations
 from collections import defaultdict
 
-# np.random.seed(10)
-
-#field = field[0:10] # try to handle Shapefile field length limit
-
 
 layer = processing.getObject(input)
 provider = layer.dataProvider()
@@ -44,7 +40,7 @@ def layerToW(layer, wType='ROOK'):
                     for v in ring:
                         v2p[v].add(i)
            
-            i+=1
+            i += 1
     else: #Rook
         e2p = defaultdict(set)
         
@@ -59,28 +55,20 @@ def layerToW(layer, wType='ROOK'):
             for poly in polys:
                 for ring in poly:
                     nv = len(ring)
-                    for oi in range(nv-1):
-                        o = ring[oi]
-                        d = ring[oi+1]
+                    for o,d in zip( ring[:-1], ring[1:] ):
                         e2p[o,d].add(i)
                         e2p[d,o].add(i)
-                            
-            i+=1
+            i += 1
         v2p = e2p
     
     n = i
     neighbors = defaultdict(set)
     for v in v2p:
         vn = v2p[v]
-        lvn = len(vn)
-        if  lvn > 1:
-            pairs = combinations(vn,2)
-            for i,j in pairs:
+        if  len(vn) > 1:
+            for i,j in combinations(vn,2):
                 neighbors[i].add(j)
                 neighbors[j].add(i)
-
-    for i in neighbors:
-        neighbors[i] = list(set(neighbors[i]))
 
     return pysal.W(neighbors)
 
@@ -93,8 +81,7 @@ else:
     print 'INFO: Rook contiguity'
     w = layerToW(layer, 'ROOK')
 
-n_neigh = w.cardinalities.values()
-print 'cardinalities: ',n_neigh
+print 'cardinalities: ', w.cardinalities.values()
 outFeat = QgsFeature()
 
 i = 0
@@ -105,6 +92,6 @@ for inFeat in processing.features(layer):
     attrs.append(float(n_neigh[i]))
     outFeat.setAttributes(attrs)
     writer.addFeature(outFeat)
-    i+=1
+    i += 1
 
 del writer
