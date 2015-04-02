@@ -81,7 +81,8 @@ else:
     print 'INFO: Rook contiguity'
     w = layerToW(layer, 'ROOK')
 
-print 'cardinalities: ', w.cardinalities.values()
+n_neigh = w.cardinalities.values()
+print 'cardinalities: ', n_neigh
 outFeat = QgsFeature()
 
 i = 0
