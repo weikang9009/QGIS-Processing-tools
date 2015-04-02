@@ -3,9 +3,9 @@
 ##contiguity=selection ROOK; QUEEN
 ##n_neighbors=output vector
 
-import pysal 
+import pysal
 import numpy as np
-import processing 
+import processing
 from processing.tools.vector import VectorWriter
 from qgis.core import *
 from PyQt4.QtCore import *
@@ -21,7 +21,7 @@ writer = VectorWriter(n_neighbors, None,fields, provider.geometryType(), layer.c
 print layer
 
 def layerToW(layer, wType='ROOK'):
-    
+
     polys = []
     ids = []
     v2p = defaultdict(set)
@@ -34,16 +34,16 @@ def layerToW(layer, wType='ROOK'):
                 polys = geom.asMultiPolygon()
             else:
                 polys = [geom.asPolygon()] # polygon
-                
+
             for poly in polys:
                 for ring in poly:
                     for v in ring:
                         v2p[v].add(i)
-           
+
             i += 1
     else: #Rook
         e2p = defaultdict(set)
-        
+
         i = 0
         for feat in iterator:
             geom = feat.geometry()
@@ -51,16 +51,17 @@ def layerToW(layer, wType='ROOK'):
                 polys = geom.asMultiPolygon()
             else:
                 polys = [geom.asPolygon()] #polygon
-                
+
             for poly in polys:
                 for ring in poly:
                     nv = len(ring)
                     for o,d in zip( ring[:-1], ring[1:] ):
-                        e2p[o,d].add(i)
-                        e2p[d,o].add(i)
+                        key = tuple(sorted([o,d], key=lambda e: (e[0], e[1])))
+                        e2p[key].add(i)
+                        #e2p[d,o].add(i)
             i += 1
         v2p = e2p
-    
+
     n = i
     neighbors = defaultdict(set)
     for v in v2p:
