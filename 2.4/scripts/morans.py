@@ -2,6 +2,7 @@
 ##input=vector
 ##field=field input
 ##contiguity=string queen
+##significance=number 0.05
 
 import pysal 
 import numpy as np
